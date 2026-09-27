@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lab Security Test</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      box-sizing: border-box;
+      margin: 10px 0;
+    }
+
+    button {
+      padding: 14px 20px;
+      cursor: pointer;
+    }
+
+    #result {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f1f1f1;
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h2>🔐 Lab Security Test</h2>
+
+  <p>Google বা YouTube URL দাও:</p>
+
+  <input
+    id="targetUrl"
+    type="url"
+    placeholder="https://www.youtube.com/..."
+  >
+
+  <button onclick="generateLink()">
+    Generate Test Link
+  </button>
+
+  <div id="result">
+    <p>Test Link:</p>
+    <input id="generatedLink" readonly>
+
+    <button onclick="copyLink()">
+      Copy Link
+    </button>
+  </div>
+
+  <script>
+    function generateLink() {
+      const url = document.getElementById("targetUrl").value.trim();
+
+      if (!url) {
+        alert("একটি URL দাও।");
+        return;
+      }
+
+      try {
+        new URL(url);
+      } catch {
+        alert("সঠিক URL দাও।");
+        return;
+      }
+
+      const sessionId =
+        crypto.randomUUID();
+
+      const testLink =
+        window.location.origin +
+        "/test.html?id=" +
+        encodeURIComponent(sessionId) +
+        "&target=" +
+        encodeURIComponent(url);
+
+      document.getElementById("generatedLink").value = testLink;
+      document.getElementById("result").style.display = "block";
+    }
+
+    function copyLink() {
+      const input =
+        document.getElementById("generatedLink");
+
+      navigator.clipboard.writeText(input.value);
+
+      alert("Test Link copied!");
+    }
+  </script>
+
+</body>
+</html>
