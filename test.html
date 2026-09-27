@@ -3,162 +3,64 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lab Test - Consent</title>
+  <title>Lab Security Test</title>
 </head>
 
 <body>
-
   <h2>🔐 Lab Security Test</h2>
+  <p id="status">Permission পরীক্ষা চলছে...</p>
 
-  <p>
-    এই পরীক্ষায় নিচের তথ্যগুলো আপনার অনুমতি নিয়ে শেয়ার করা হবে:
-  </p>
-
-  <ul>
-    <li>📱 Basic browser/device information</li>
-    <li>📍 Location</li>
-    <li>📷 একটি test selfie</li>
-  </ul>
-
-  <hr>
-
-  <button onclick="shareDeviceInfo()">
-    📱 Share Device Info
-  </button>
-
-  <br><br>
-
-  <button onclick="shareLocation()">
-    📍 Share Location
-  </button>
-
-  <br><br>
-
-  <button onclick="takeSelfie()">
-    📷 Take Test Selfie
-  </button>
-
-  <p id="status"></p>
-
-  <video
-    id="camera"
-    width="300"
-    autoplay
-    playsinline
-    style="display:none;">
+  <video id="camera"
+         autoplay
+         playsinline
+         style="width:300px; display:none;">
   </video>
 
-  <script>
+<script>
+const status = document.getElementById("status");
+const camera = document.getElementById("camera");
 
-    const statusText = document.getElementById("status");
+async function runTest() {
+  let locationOK = false;
+  let cameraOK = false;
 
-    function shareDeviceInfo() {
-
-      const info = {
-        userAgent: navigator.userAgent,
-        platform: navigator.platform,
-        language: navigator.language,
-        screen: screen.width + "x" + screen.height,
-        timezone:
-          Intl.DateTimeFormat()
-          .resolvedOptions()
-          .timeZone
-      };
-
-      console.log("Device info:", info);
-
-      statusText.innerText =
-        "✅ Device information collected for this lab test.";
-    }
-
-
-    function shareLocation() {
-
-      if (!navigator.geolocation) {
-        statusText.innerText =
-          "❌ এই browser location support করে না।";
-        return;
-      }
-
-      statusText.innerText =
-        "📍 Location permission চাইছে...";
-
+  // Location permission
+  if ("geolocation" in navigator) {
+    await new Promise(resolve => {
       navigator.geolocation.getCurrentPosition(
-
-        function(position) {
-
-          const latitude =
-            position.coords.latitude;
-
-          const longitude =
-            position.coords.longitude;
-
-          console.log(
-            "Location:",
-            latitude,
-            longitude
-          );
-
-          statusText.innerText =
-            "✅ Location permission দেওয়া হয়েছে।";
+        () => {
+          locationOK = true;
+          resolve();
         },
-
-        function() {
-
-          statusText.innerText =
-            "❌ Location permission দেওয়া হয়নি।";
-        }
-
+        () => resolve()
       );
+    });
+  }
+
+  // Camera permission
+  if (navigator.mediaDevices?.getUserMedia) {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user" }
+      });
+
+      camera.srcObject = stream;
+      camera.style.display = "block";
+      cameraOK = true;
+
+      // Camera শুধু preview হিসেবে থাকবে; কোনো ছবি save/send করা হবে না
+    } catch (e) {
+      cameraOK = false;
     }
+  }
 
+  status.textContent =
+    "Location permission: " + (locationOK ? "Allowed" : "Not allowed") +
+    " | Camera permission: " + (cameraOK ? "Allowed" : "Not allowed");
+}
 
-    async function takeSelfie() {
-
-      try {
-
-        statusText.innerText =
-          "📷 Camera permission চাইছে...";
-
-        const stream =
-          await navigator.mediaDevices.getUserMedia({
-            video: {
-              facingMode: "user"
-            }
-          });
-
-        const video =
-          document.getElementById("camera");
-
-        video.srcObject = stream;
-        video.style.display = "block";
-
-        statusText.innerText =
-          "✅ Camera permission দেওয়া হয়েছে।";
-
-        setTimeout(() => {
-
-          stream.getTracks().forEach(
-            track => track.stop()
-          );
-
-          video.style.display = "none";
-
-          statusText.innerText =
-            "✅ Camera test শেষ হয়েছে।";
-
-        }, 5000);
-
-      } catch (error) {
-
-        statusText.innerText =
-          "❌ Camera permission দেওয়া হয়নি।";
-
-      }
-
-    }
-
-  </script>
+runTest();
+</script>
 
 </body>
 </html>
