@@ -4,34 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lab Security Test</title>
-
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 600px;
-      margin: 40px auto;
-      padding: 20px;
-    }
-
-    input {
-      width: 100%;
-      padding: 14px;
-      box-sizing: border-box;
-      margin: 10px 0;
-    }
-
-    button {
-      padding: 14px 20px;
-      cursor: pointer;
-    }
-
-    #result {
-      margin-top: 20px;
-      padding: 15px;
-      background: #f1f1f1;
-      display: none;
-    }
-  </style>
 </head>
 
 <body>
@@ -44,24 +16,39 @@
     id="targetUrl"
     type="url"
     placeholder="https://www.youtube.com/..."
+    style="width:90%;padding:12px;"
   >
+
+  <br><br>
 
   <button onclick="generateLink()">
     Generate Test Link
   </button>
 
-  <div id="result">
+  <div id="result" style="display:none;margin-top:20px;">
+
     <p>Test Link:</p>
-    <input id="generatedLink" readonly>
+
+    <input
+      id="generatedLink"
+      readonly
+      style="width:90%;padding:12px;"
+    >
+
+    <br><br>
 
     <button onclick="copyLink()">
       Copy Link
     </button>
+
   </div>
 
   <script>
+
     function generateLink() {
-      const url = document.getElementById("targetUrl").value.trim();
+
+      const url =
+        document.getElementById("targetUrl").value.trim();
 
       if (!url) {
         alert("একটি URL দাও।");
@@ -75,21 +62,33 @@
         return;
       }
 
-      const sessionId =
-        crypto.randomUUID();
+      const sessionId = crypto.randomUUID();
+
+      /*
+        Relative URL ব্যবহার করছি।
+        তাই GitHub repository-এর নাম আলাদাভাবে
+        লিখতে হবে না।
+      */
 
       const testLink =
-        window.location.origin +
-        "/test.html?id=" +
-        encodeURIComponent(sessionId) +
-        "&target=" +
-        encodeURIComponent(url);
+        new URL(
+          "test.html?id=" +
+          encodeURIComponent(sessionId) +
+          "&target=" +
+          encodeURIComponent(url),
+          window.location.href
+        ).href;
 
-      document.getElementById("generatedLink").value = testLink;
-      document.getElementById("result").style.display = "block";
+      document.getElementById("generatedLink").value =
+        testLink;
+
+      document.getElementById("result").style.display =
+        "block";
     }
 
+
     function copyLink() {
+
       const input =
         document.getElementById("generatedLink");
 
@@ -97,6 +96,7 @@
 
       alert("Test Link copied!");
     }
+
   </script>
 
 </body>
