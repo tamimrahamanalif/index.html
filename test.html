@@ -1,194 +1,64 @@
-<!DOCTYPE html>
-<html lang="bn">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    min-height: 100vh;
+    background: #f5f5f5;
 
-  <title>Lab Security Test</title>
-
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 600px;
-      margin: auto;
-      padding: 25px;
-      background: #f5f5f5;
-    }
-
-    .box {
-      background: white;
-      padding: 25px;
-      border-radius: 15px;
-      box-shadow: 0 3px 12px rgba(0,0,0,0.12);
-    }
-
-    button {
-      padding: 12px 20px;
-      border: none;
-      border-radius: 8px;
-      background: #222;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    #camera {
-      width: 100%;
-      max-width: 400px;
-      margin-top: 15px;
-      border-radius: 10px;
-    }
-
-    #photo {
-      width: 100%;
-      max-width: 400px;
-      margin-top: 15px;
-      border-radius: 10px;
-      display: none;
-    }
-
-    #status {
-      margin-top: 15px;
-      font-weight: bold;
-    }
-  </style>
-</head>
-
-<body>
-
-<div class="box">
-
-  <h2>🔐 Lab Security Test</h2>
-
-  <p>
-    Camera permission দেওয়ার পর test photo তোলা যাবে।
-  </p>
-
-  <button id="takePhotoBtn">
-    📷 Take Photo
-  </button>
-
-  <p id="status"></p>
-
-  <video
-    id="camera"
-    autoplay
-    playsinline
-    style="display:none;">
-  </video>
-
-  <canvas
-    id="canvas"
-    style="display:none;">
-  </canvas>
-
-  <img
-    id="photo"
-    alt="Test photo">
-
-</div>
-
-<script>
-
-const button = document.getElementById("takePhotoBtn");
-const video = document.getElementById("camera");
-const canvas = document.getElementById("canvas");
-const photo = document.getElementById("photo");
-const status = document.getElementById("status");
-
-let cameraStream = null;
-
-
-// Take Photo button
-button.addEventListener("click", async () => {
-
-  try {
-
-    status.innerText =
-      "📷 Camera permission চাইছে...";
-
-    cameraStream =
-      await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: "user"
-        },
-        audio: false
-      });
-
-    video.srcObject = cameraStream;
-
-    video.style.display = "block";
-
-    status.innerText =
-      "📷 Camera ready। ছবি তোলার জন্য আবার Take Photo চাপো।";
-
-    button.innerText =
-      "📸 Capture Photo";
-
-    button.onclick = capturePhoto;
-
-  } catch (error) {
-
-    status.innerText =
-      "❌ Camera permission দেওয়া হয়নি।";
-
-    console.log(error);
-
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
-});
-
-
-// Capture photo
-function capturePhoto() {
-
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-
-  const context = canvas.getContext("2d");
-
-  context.drawImage(
-    video,
-    0,
-    0,
-    canvas.width,
-    canvas.height
-  );
-
-  const imageData =
-    canvas.toDataURL("image/jpeg", 0.9);
-
-  // Photo local preview
-  photo.src = imageData;
-  photo.style.display = "block";
-
-  status.innerText =
-    "✅ Test photo তৈরি হয়েছে।";
-
-  // Camera বন্ধ
-  if (cameraStream) {
-
-    cameraStream
-      .getTracks()
-      .forEach(track => track.stop());
-
-    cameraStream = null;
+  .box {
+    width: 90%;
+    max-width: 600px;
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.12);
+    text-align: center;
   }
 
-  video.style.display = "none";
+  #takePhotoBtn {
+    display: block;
+    margin: 30px auto;
+    width: 80%;
+    max-width: 400px;
+    padding: 22px 25px;
 
-  button.style.display = "none";
+    border: none;
+    border-radius: 12px;
 
-  /*
-    গুরুত্বপূর্ণ:
-    এই মুহূর্তে ছবিটি কোথাও পাঠানো হচ্ছে না।
-    পরের ধাপে backend যুক্ত করে,
-    user-এর অনুমতির পরে Phone 1 dashboard-এ পাঠানো যাবে।
-  */
+    background: #222;
+    color: white;
 
-}
+    font-size: 24px;
+    font-weight: bold;
 
-</script>
+    cursor: pointer;
+  }
 
-</body>
-</html>
+  #takePhotoBtn:active {
+    transform: scale(0.98);
+  }
+
+  #camera,
+  #photo {
+    width: 100%;
+    max-width: 400px;
+    margin: 15px auto;
+    border-radius: 10px;
+  }
+
+  #camera,
+  #photo {
+    display: none;
+  }
+
+  #status {
+    margin-top: 15px;
+    font-weight: bold;
+    line-height: 1.5;
+  }
+</style>
