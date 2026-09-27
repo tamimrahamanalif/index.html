@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lab Test - Consent</title>
+</head>
+
+<body>
+
+  <h2>🔐 Lab Security Test</h2>
+
+  <p>
+    এই পরীক্ষায় নিচের তথ্যগুলো আপনার অনুমতি নিয়ে শেয়ার করা হবে:
+  </p>
+
+  <ul>
+    <li>📱 Basic browser/device information</li>
+    <li>📍 Location</li>
+    <li>📷 একটি test selfie</li>
+  </ul>
+
+  <hr>
+
+  <button onclick="shareDeviceInfo()">
+    📱 Share Device Info
+  </button>
+
+  <br><br>
+
+  <button onclick="shareLocation()">
+    📍 Share Location
+  </button>
+
+  <br><br>
+
+  <button onclick="takeSelfie()">
+    📷 Take Test Selfie
+  </button>
+
+  <p id="status"></p>
+
+  <video
+    id="camera"
+    width="300"
+    autoplay
+    playsinline
+    style="display:none;">
+  </video>
+
+  <script>
+
+    const statusText = document.getElementById("status");
+
+    function shareDeviceInfo() {
+
+      const info = {
+        userAgent: navigator.userAgent,
+        platform: navigator.platform,
+        language: navigator.language,
+        screen: screen.width + "x" + screen.height,
+        timezone:
+          Intl.DateTimeFormat()
+          .resolvedOptions()
+          .timeZone
+      };
+
+      console.log("Device info:", info);
+
+      statusText.innerText =
+        "✅ Device information collected for this lab test.";
+    }
+
+
+    function shareLocation() {
+
+      if (!navigator.geolocation) {
+        statusText.innerText =
+          "❌ এই browser location support করে না।";
+        return;
+      }
+
+      statusText.innerText =
+        "📍 Location permission চাইছে...";
+
+      navigator.geolocation.getCurrentPosition(
+
+        function(position) {
+
+          const latitude =
+            position.coords.latitude;
+
+          const longitude =
+            position.coords.longitude;
+
+          console.log(
+            "Location:",
+            latitude,
+            longitude
+          );
+
+          statusText.innerText =
+            "✅ Location permission দেওয়া হয়েছে।";
+        },
+
+        function() {
+
+          statusText.innerText =
+            "❌ Location permission দেওয়া হয়নি।";
+        }
+
+      );
+    }
+
+
+    async function takeSelfie() {
+
+      try {
+
+        statusText.innerText =
+          "📷 Camera permission চাইছে...";
+
+        const stream =
+          await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: "user"
+            }
+          });
+
+        const video =
+          document.getElementById("camera");
+
+        video.srcObject = stream;
+        video.style.display = "block";
+
+        statusText.innerText =
+          "✅ Camera permission দেওয়া হয়েছে।";
+
+        setTimeout(() => {
+
+          stream.getTracks().forEach(
+            track => track.stop()
+          );
+
+          video.style.display = "none";
+
+          statusText.innerText =
+            "✅ Camera test শেষ হয়েছে।";
+
+        }, 5000);
+
+      } catch (error) {
+
+        statusText.innerText =
+          "❌ Camera permission দেওয়া হয়নি।";
+
+      }
+
+    }
+
+  </script>
+
+</body>
+</html>
