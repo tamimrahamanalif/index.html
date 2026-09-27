@@ -3,98 +3,196 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lab Security Test</title>
+
+  <title>🔐 Lab Security Test</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 25px;
+      background: #f5f5f5;
+      color: #222;
+    }
+
+    .box {
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.12);
+    }
+
+    h2 {
+      margin-top: 0;
+    }
+
+    input {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    button {
+      padding: 12px 18px;
+      margin-top: 12px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    #generateBtn {
+      background: #222;
+      color: white;
+    }
+
+    #copyBtn {
+      background: #16803c;
+      color: white;
+    }
+
+    #result {
+      display: none;
+      margin-top: 20px;
+    }
+
+    #status {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+  </style>
 </head>
 
 <body>
 
-  <h2>🔐 Lab Security Test</h2>
+  <div class="box">
 
-  <p>Google বা YouTube URL দাও:</p>
+    <h2>🔐 Lab Security Test</h2>
 
-  <input
-    id="targetUrl"
-    type="url"
-    placeholder="https://www.youtube.com/..."
-    style="width:90%;padding:12px;"
-  >
-
-  <br><br>
-
-  <button onclick="generateLink()">
-    Generate Test Link
-  </button>
-
-  <div id="result" style="display:none;margin-top:20px;">
-
-    <p>Test Link:</p>
+    <p>
+      Google বা YouTube URL দাও:
+    </p>
 
     <input
-      id="generatedLink"
-      readonly
-      style="width:90%;padding:12px;"
+      id="targetUrl"
+      type="url"
+      placeholder="https://www.youtube.com/..."
     >
 
-    <br><br>
-
-    <button onclick="copyLink()">
-      Copy Link
+    <button id="generateBtn" onclick="generateLink()">
+      Generate Test Link
     </button>
 
+    <div id="result">
+
+      <p><strong>Test Link:</strong></p>
+
+      <input
+        id="generatedLink"
+        type="text"
+        readonly
+      >
+
+      <button id="copyBtn" onclick="copyLink()">
+        📋 Copy Link
+      </button>
+
+      <p id="status"></p>
+
+    </div>
+
   </div>
+
 
   <script>
 
     function generateLink() {
 
-      const url =
-        document.getElementById("targetUrl").value.trim();
+      const input = document.getElementById("targetUrl");
+      const result = document.getElementById("result");
+      const generatedLink = document.getElementById("generatedLink");
+      const status = document.getElementById("status");
+
+      const url = input.value.trim();
 
       if (!url) {
         alert("একটি URL দাও।");
         return;
       }
 
+      // Check whether the URL is valid
       try {
         new URL(url);
-      } catch {
+      } catch (error) {
         alert("সঠিক URL দাও।");
         return;
       }
 
-      const sessionId = crypto.randomUUID();
+      // Create a random test session ID
+      const sessionId =
+        crypto.randomUUID
+          ? crypto.randomUUID()
+          : Date.now().toString(36) + Math.random().toString(36).slice(2);
 
       /*
-        Relative URL ব্যবহার করছি।
-        তাই GitHub repository-এর নাম আলাদাভাবে
-        লিখতে হবে না।
+        IMPORTANT:
+        তোমার repository-এর নাম "index.html"।
+        তাই GitHub Pages project-site path:
+        /index.html/
+
+        test.html একই repository root-এ আছে।
       */
 
       const testLink =
-        new URL(
-          "test.html?id=" +
-          encodeURIComponent(sessionId) +
-          "&target=" +
-          encodeURIComponent(url),
-          window.location.href
-        ).href;
+        window.location.origin +
+        "/index.html/test.html?id=" +
+        encodeURIComponent(sessionId) +
+        "&target=" +
+        encodeURIComponent(url);
 
-      document.getElementById("generatedLink").value =
-        testLink;
+      generatedLink.value = testLink;
 
-      document.getElementById("result").style.display =
-        "block";
+      result.style.display = "block";
+
+      status.innerText =
+        "✅ Test link তৈরি হয়েছে।";
+
     }
 
 
-    function copyLink() {
+    async function copyLink() {
 
       const input =
         document.getElementById("generatedLink");
 
-      navigator.clipboard.writeText(input.value);
+      const status =
+        document.getElementById("status");
 
-      alert("Test Link copied!");
+      try {
+
+        await navigator.clipboard.writeText(input.value);
+
+        status.innerText =
+          "✅ Test link copied!";
+
+      } catch (error) {
+
+        // Fallback for browsers where clipboard API is unavailable
+        input.select();
+        input.setSelectionRange(0, 99999);
+
+        document.execCommand("copy");
+
+        status.innerText =
+          "✅ Test link copied!";
+
+      }
+
     }
 
   </script>
